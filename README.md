@@ -1,2 +1,2 @@
 # DatavisFinalProject
-My final data vis project
+This was my final project for my data visualization class.

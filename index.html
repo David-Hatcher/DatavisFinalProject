@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+<head>
+
+  <!-- Meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+  <!-- CSS -->
+  <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> -->
+
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Load d3-cloud -->
+  <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+
+  <!-- JavaScript -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"></script>
+
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <!-- <script src="https://d3js.org/d3-dispatch.v2.min.js"></script>
+  <script src="https://d3js.org/d3-quadtree.v2.min.js"></script>
+  <script src="https://d3js.org/d3-timer.v2.min.js"></script>
+  <script src="https://d3js.org/d3-force.v2.min.js"></script> -->
+
+  <script src='./js/dataFilter.js'></script>
+  <script src='./js/insultTarget.js'></script>
+  <script src='./js/commonWords.js'></script>
+  <script src='./js/insultDate.js'></script>
+  <script src='./js/wordLinks.js'></script>
+  <script src='./js/calanderHeatMap.js'></script>
+
+
+  <title>Trump Insults Dashboard</title>
+
+</head>
+<body class="bg-gray-800">
+
+<div class="page page-center grid grid-cols-12 text-white gap-10">
+  <h1 class="text-center col-span-full text-3xl font-bold">Trumps Tweeted Insults</h1>
+  <p class="col-span-6 col-start-4 text-center">The data set used here is one i found from an unknown user on reddit's r/datasets, <a href="https://www.reddit.com/r/datasets/comments/l12fpy/all_trumps_twitter_insults_from_2015_to_2021_in/">here</a>, and was extracted from <a href="https://www.nytimes.com/interactive/2021/01/19/upshot/trump-complete-insult-list.html">The NYT Complete List of Trump's Twitter Insults</a>. The dataset includes the list of all of the insults Trump Tweeted from 2015 to when his account of closed.</p>
+  <p class="col-span-6 col-start-4 text-center">My original questions where the following list. However, after building some of the visualizations I ended up refining them to the 5 questions above the individual visualizations.</p>
+  <ul class="col-span-3 col-start-6 list-disc">
+    <li>Who were the most common targets?</li>
+    <li>How often did he insult people per day?</li>
+    <li>What were the most common words used in insults?</li>
+    <li>How are the words linked?</li>
+  </ul>
+  <div id="svgcont" class="col-span-full text-center grid grid-cols-12 gap-3 mx-4 mb-10">
+    <div class="md:col-span-6 col-span-12">
+      How many time per month did Trump tweet an insult to someone?
+      <svg id="insultDate" class="insult_svg w-full"></svg>
+      <p class="my-4">This chart was originally supposed to be a line chart that allowed the viewer to see the count of total insults per day on the line. However once I set it up to do that I realized that the information was so cluttered you couldn't actually get any useful information from it. So then I decided to split the data by the number of insults per month. This allowed me to create a line chart that the viewer could actually absorb the information and have an actual understanding of it.</p>
+      <p class="my-4">Basically in order to do this I parsed through the dataset and grouped all of the insults by month and counted each entry. Using this I was able to create a dataset that just contained the month and total number of tweeted insults. The visualization uses position both horizontal and vertical to convey the information. It also allows for details-on-demand, as mousing over the chart will allow you to do the actual number of at a given point on the line.</p>
+    </div>
+    <div class="md:col-span-6 col-span-12">
+      <p class="col-span-full">Who where the most common targets of Trumps twitter Insults?</p>
+      <svg id="insultTarget" class="insult_svg w-full my-4"></svg>
+			<button class="row-start-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded" id="insult_prev" onClick="reverseCycleInsult()">Previous Set of 50<br><p class="text-3xl">&larr;</p></button>
+			<button class="row-start-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded" id="insult_next" onClick="forwardCycleInsult()">Next Set of 50<br><p class="text-3xl">&rarr;</p></button>
+      <p class="my-4">My original intent for this visualization was to just show the top N targets of his insults. However, after building it I decided to allow the view to click through the different brackets of 50 targets. The main question I wanted to answer here was "Who were the main targets of all of his insults?" So in order to accomplish that I parsed through the dataset which contained attributes for up to 6 targets of insults per tweet, with most tweets having between 1 and 2, and sorted the information by the targets and the number of times that target showed up.</p>
+      <p class="my-4">The data in this chart is encoded using position and the viewer and interact with it in two different ways. The first and most noticable interaction is by using the buttons under the chart to cycle through the different entries in the data. The second interaction is details-on-demand as the mousing over a bar will given you specific information on that bar.</p>
+    </div>
+    <div class="md:col-span-6 col-span-12">
+      <p class="col-span-full">What were the most common words used in the insults?</p>
+      <svg id="wordCount" class="w-full my-4 insult_svg"></svg>
+      <div class="slidecontainer col-span-12">
+        <div class="col-span-12 grid grid-rows-3">
+          <div class="col-span-6">
+            Upper Bound:
+          </div>
+          <div class="slidecontainer col-span-6">
+            <input type="range" min="1" max="500" value="200" class="slider w-full" id="highBoundsCommon" onInput="updateUpperSliderCommonText(value)" onChange="updateCommonWordsUpper(value)">
+          </div>
+          <p class="col-span-full" id="commonSliderUpper">200</p>
+          <p class="my-4 col-span-full">My original intent was to have a word cloud of the 50 most common words that appeared in the insults. After using just 50 I realized the chart was a bit sparse and didn't actually could reasonably show more information. Thus, I decided to set the base number to 200 and allow the user to adjust a slide to show more or less depending on what they wanted to see. Once this was finished I realized that this word cloud much like most didn't really paint much a picture as it's hard to really understand what are the most common words used.</p>
+          <p class="my-4 col-span-full">Because of the difficulty in determing the most common words I decided to add another form of interaction. This is the ability to mouse over a specific word and see the actual count of occurences of that word. The data being encoded in this chart is the occurences of each word and it is being displayed using the size channel. </p>
+        </div>
+      </div>
+    </div>
+    <div class="md:col-span-6 col-span-12">
+      <p class="col-span-full">How were these common words linked with other words?</p>
+      <svg id="wordLinks" class="w-full my-4 insult_svg"></svg>
+      <div class="grid grid-cols-6">
+        <div class="col-span-6">
+          Upper Bound:
+        </div>
+        <div class="slidecontainer col-span-6">
+          <input type="range" min="1" max="250" value="50" class="slider w-full" id="highBoundsWords" onInput="updateSliderText(value)" onChange="updateWordLinks(value)">
+        </div>
+        <p class="col-start-3 col-span-2" id="linkSlider">50</p>
+        <p class="my-4 col-span-full">As I knew the previous chart wasn't going to provide a vast about of information I decided I would show what other words were used with the top X words used. I did this by linking the different words that appeared in the insults together. Once of the decisions I had to made here was how often they had to appear together before they were considered linked. I decided to go with 5 times as I felt that showed there was some connection between those words and they were just incidentally showing up together. In this visualization the nodes represent the different words that showed up with the top X amount of words used. This is set to 50 by default, so it shows the words that were used at least 5 times in tweets that contained at least one of the top 50 words.</p>
+        <p class="my-4 col-span-full">Once I built the visualization I realized that it was pretty difficult to understand how the words were actually linked since my original mouse over interaction just showed the word tha the node represented. Once I realized this I decided to add onto the tooltip the list of nodes that were connected to the node that the user was hovering over. </p>
+      </div>      
+    </div>    
+    <div class="md:col-span-6 col-span-12 md:col-start-4 grid-cols-4">
+      <p class="col-span-full">What days did he insult the most people?</p>
+      <div id="calanderHeatMap" class="col-span-full"></div>
+      <p class="my-4 col-span-full">Since my first question, "How often did he insult people per day?", was basically unanswered because of the visualization I chose, I decided to create a different visualization to answer this. I chose a Calendar Heatmap as this data seemed to work rather well with that since I had exact number of insults per day during the course of these 6 years. In order to get the data in the form I needed, I followed almost the same algorithm as the first visualization but instead of mapping to a month, I mapped the count to a day.</p>
+      <p class="my-4 col-span-full">The data being encoded here is the number of tweeted insults per day. And the channel being used it hue. The darker the red the more insults he tweeted that day.</p>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+  var insultRange = [0,50]
+  var targetCount = null;
+  var dateCount = null;
+  var wordCount = null;
+  var nodelinks = null;
+  var wordCountLower = 0;
+  var wordCountUpper = 200;
+
+  d3.csv("data/trump_insult_tweets_2014_to_2021.csv", (row, i) => {
+    return {
+      date: row.date,
+      tweet: row.tweet,
+      i_1 : row.insult_1,
+      t_1 : row.target_1,
+      i_2 : row.insult_2,
+      t_2 : row.target_2,
+      i_3 : row.insult_3,
+      t_3 : row.target_3,
+      i_4 : row.insult_4,
+      t_4 : row.target_4,
+      i_5 : row.insult_5,
+      t_5 : row.target_5,
+      i_6 : row.insult_6,
+      t_6 : row.target_6
+    };
+  }).then(rows => {
+    data = rows;
+    targetCount = buildTargetCount(data);
+    dateCount = buildDateCount(data);
+    wordCount = buildWordCount(data);
+    nodelinks = buildNodeLinksWords(data,[...wordCount],[0,50]);
+    dateCountByDay = buildDateCountByDay(data);
+  }).then(() =>{
+    insultTarget("#insultTarget",targetCount.slice(insultRange[0],insultRange[1]));
+    insultDate("#insultDate",dateCount);
+    commonWordsCloud("#wordCount",[...wordCount].slice(wordCountLower,wordCountUpper));
+    wordLinks("#wordLinks",nodelinks);
+    calanderHeatMap("#calanderHeatMap",dateCountByDay);
+	}).catch(error => {
+    console.log(error);
+  });
+</script>
+
+
+<script>
+//Functions
+  const forwardCycleInsult = () => {
+		insultRange = [getNewNextMin(insultRange[0]),getNewNextMax(insultRange[1])];
+		console.log(insultRange)
+		insultTarget("#insultTarget",targetCount.slice(insultRange[0],insultRange[1]))
+  }
+
+	const getNewNextMax = (oldMax) => {
+		let newMax = oldMax + 50;
+		if(newMax > targetCount.length - 1){
+			newMax = targetCount.length - 1
+		}
+		return newMax;
+	}
+
+	const getNewNextMin = (oldMin) => {
+		let newMin = oldMin + 50;
+		if(newMin > targetCount.length - 51){
+			newMin = targetCount.length - 51;
+		}
+		return newMin;
+	}
+
+	const getNewPrevMax = (oldMax) => {
+		let newMax = oldMax - 50;
+		if(newMax < 50){
+			newMax = 50;
+		}
+		return newMax;
+	}
+
+	const getNewPrevMin = (oldMin) => {
+		let newMin = oldMin - 50;
+		if(newMin < 0){
+			newMin = 0;
+		}
+		return newMin;
+	}
+	const reverseCycleInsult = () => {
+		insultRange = [getNewPrevMin(insultRange[0]),getNewPrevMax(insultRange[1])];
+		console.log(insultRange)
+		insultTarget("#insultTarget",targetCount.slice(insultRange[0],insultRange[1]))
+	}
+
+  const updateSliderText = (value) => {
+    document.getElementById("linkSlider").innerHTML = value;
+  }
+
+  const updateUpperSliderCommonText = (value) => {
+    document.getElementById("commonSliderUpper").innerHTML = value;
+  }
+
+  const updateWordLinks = (value) => {
+    d3.selectAll("#wordLinks > g").transition().duration(1000).attr("opacity",0).remove();
+    nodelinks = buildNodeLinksWords(data,[...wordCount],[0,event.target.value]);
+    wordLinks("#wordLinks",nodelinks);
+  }
+
+  const updateCommonWordsUpper = (value) => {
+    d3.selectAll("#wordCount > g").transition().duration(1000).attr("opacity",0).remove();
+    wordCountUpper = value;
+    commonWordsCloud("#wordCount",[...wordCount].slice(wordCountLower,wordCountUpper));
+  }
+</script>
+
+
+</body>
+</html>
